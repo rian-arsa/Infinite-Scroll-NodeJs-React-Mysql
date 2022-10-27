@@ -4,10 +4,9 @@ const { Op } = require("sequelize");
 const getUsers = async (req, res) => {
   const last_id = parseInt(req.query.lastId) || 0;
   const limit = parseInt(req.query.limit) || 10;
-  const search = req.query.search || "";
+  const search = req.query.search_query || "";
 
   let result = [];
-
   if (last_id < 1) {
     const results = await User.findAll({
       where: {
@@ -31,10 +30,10 @@ const getUsers = async (req, res) => {
   } else {
     const results = await User.findAll({
       where: {
+        id: {
+          [Op.lt]: last_id,
+        },
         [Op.or]: [
-          {
-            [Op.lt]: last_id,
-          },
           {
             name: {
               [Op.like]: "%" + search + "%",
@@ -52,7 +51,6 @@ const getUsers = async (req, res) => {
     });
     result = results;
   }
-
   res.json({
     result: result,
     lastId: result.length ? result[result.length - 1].id : 0,
